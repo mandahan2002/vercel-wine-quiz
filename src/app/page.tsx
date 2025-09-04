@@ -19,7 +19,40 @@ type WineProfile = {
 };
 
 // === データ ===
-const ARCHETYPES = wines as unknown as WineProfile[];
+// === データ ===
+// まずは unknown 経由で受ける
+const RAW_WINES = wines as unknown as any[];
+
+// JSONのばらつきを吸収して WineProfile に正規化
+const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
+  const rawAnswers = (w.answers ?? {}) as Record<string, any>;
+
+  const safeAnswers: Record<string, AnswerDetail | undefined> = {};
+  Object.entries(rawAnswers).forEach(([key, val]) => {
+    if (!val) return;
+    // 期待形：{ correct: string[], note?: string }
+    if (Array.isArray(val.correct)) {
+      safeAnswers[key] = { correct: val.correct as string[], note: val.note };
+      return;
+    }
+    // 旧形対応：["A","B"] の配列だけ入っている場合も拾う
+    if (Array.isArray(val)) {
+      safeAnswers[key] = { correct: val as string[] };
+      return;
+    }
+  });
+
+  const normalized: WineProfile = {
+    id: w.id,
+    grape: w.grape,
+    region: w.region,
+    vintageHint: w.vintageHint,
+    isRed: Boolean(w.isRed),
+    notes: w.notes,
+    answers: safeAnswers,
+  };
+  return normalized;
+});
 const ORDER = [
   "清澄度",
   "輝き",
