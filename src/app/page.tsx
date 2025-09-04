@@ -19,7 +19,7 @@ type WineProfile = {
 };
 
 // === データ ===
-const ARCHETYPES = wines as WineProfile[];
+const ARCHETYPES = wines as unknown as WineProfile[];
 const ORDER = [
   "清澄度",
   "輝き",
