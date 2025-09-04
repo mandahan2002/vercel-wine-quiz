@@ -281,50 +281,74 @@ export default function Page() {
           正解数ヒントを表示
         </label>
 
-        <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
-          <div className="inline-flex rounded-lg overflow-hidden border">
-            <button
-              className={`px-3 py-1 text-sm ${mode === "random" ? "bg-black text-white" : "bg-white"}`}
-              onClick={() => setMode("random")}
-            >
-              ランダム
-            </button>
-            <button
-              className={`px-3 py-1 text-sm ${mode === "manual" ? "bg-black text-white" : "bg-white"}`}
-              onClick={() => setMode("manual")}
-            >
-              手動選択
-            </button>
-          </div>
+        // ヘッダー内のボタングループをこのブロックで置き換え
+<div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+  {/* セグメントの外枠（ライト/ダーク両対応） */}
+  <div className="inline-flex rounded-lg overflow-hidden border border-neutral-300 bg-white
+                  dark:border-neutral-700 dark:bg-neutral-900">
+    {/* helper: 選択/未選択のスタイル */}
+    {[
+      { key: "random", label: "ランダム" as const },
+      { key: "manual", label: "手動選択" as const },
+    ].map((seg) => {
+      const active = (seg.key === mode);
+      const base =
+        "px-4 py-2 text-sm font-medium transition-colors outline-none " +
+        "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black focus-visible:ring-offset-white " +
+        "dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900";
 
-          {mode === "manual" && (
-            <select
-              className="border rounded-lg px-3 py-2 text-sm w-full sm:w-[420px]"
-              value={selectedWineId}
-              onChange={(e) => {
-                const id = e.target.value;
-                setSelectedWineId(id);
-                if (id) setWineById(id);
-              }}
-            >
-              <option value="">ワインを選択...</option>
-              <optgroup label="白ワイン">
-                {ARCHETYPES.filter((w) => !w.isRed).map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.region}｜{w.grape}（{w.vintageHint}）
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="赤ワイン">
-                {ARCHETYPES.filter((w) => w.isRed).map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.region}｜{w.grape}（{w.vintageHint}）
-                  </option>
-                ))}
-              </optgroup>
-            </select>
-          )}
-        </div>
+      const activeCls =
+        "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"; // 選択時：ライト=黒地/白字、ダーク=白地/黒字
+      const inactiveCls =
+        "bg-transparent text-neutral-700 hover:bg-neutral-100 " +       // 未選択（ライト）
+        "dark:text-neutral-300 dark:hover:bg-neutral-800";              // 未選択（ダーク）
+
+      return (
+        <button
+          key={seg.key}
+          type="button"
+          aria-pressed={active}
+          className={`${base} ${active ? activeCls : inactiveCls}`}
+          onClick={() => setMode(seg.key as "random" | "manual")}
+        >
+          {seg.label}
+        </button>
+      );
+    })}
+  </div>
+
+  {/* 手動モードのセレクトはそのまま */}
+  {mode === "manual" && (
+    <select
+      className="border rounded-lg px-3 py-2 text-sm w-full sm:w-[420px]
+                 bg-white text-neutral-900 border-neutral-300
+                 dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700"
+      value={selectedWineId}
+      onChange={(e) => {
+        const id = e.target.value;
+        setSelectedWineId(id);
+        if (id) setWineById(id);
+      }}
+    >
+      <option value="">ワインを選択...</option>
+      <optgroup label="白ワイン">
+        {ARCHETYPES.filter((w) => !w.isRed).map((w) => (
+          <option key={w.id} value={w.id}>
+            {w.region}｜{w.grape}（{w.vintageHint}）
+          </option>
+        ))}
+      </optgroup>
+      <optgroup label="赤ワイン">
+        {ARCHETYPES.filter((w) => w.isRed).map((w) => (
+          <option key={w.id} value={w.id}>
+            {w.region}｜{w.grape}（{w.vintageHint}）
+          </option>
+        ))}
+      </optgroup>
+    </select>
+  )}
+</div>
+
       </header>
 
       <div className="p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800">
