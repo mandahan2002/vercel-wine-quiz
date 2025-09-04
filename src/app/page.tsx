@@ -157,24 +157,41 @@ function QuizGroup({
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const isPicked = picked.has(opt);
-          let color = "bg-neutral-100";
+          let color =
+           "bg-neutral-100 text-neutral-900 border border-neutral-300 " + // ライト
+           "dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-600";
           if (revealed) {
-            if (correctSet.has(opt) && isPicked) {
-               color = "bg-green-600 text-white border border-green-700"; // 濃い緑
-             } else if (correctSet.has(opt) && !isPicked) {
-              color = "bg-white text-green-700 border border-green-700 font-semibold"; // 枠付き
-          } else if (!correctSet.has(opt) && isPicked) {
-        color = "bg-red-600 text-white border border-red-700"; // 濃い赤
-          }
-        } else {
-          if (isPicked) color = "bg-blue-600 text-white border border-blue-700"; // 濃い青
-        }
+  if (correctSet.has(opt) && isPicked) {
+    // 正解を選択
+    color =
+      "bg-green-600 text-white border border-green-700 " +          // Light
+      "dark:bg-green-500 dark:text-black dark:border-green-600";     // Dark
+  } else if (correctSet.has(opt) && !isPicked) {
+    // 未選択の正解（枠で示す）
+    color =
+      "bg-white text-green-700 border border-green-700 font-semibold " +      // Light
+      "dark:bg-transparent dark:text-green-300 dark:border-green-400";
+  } else if (!correctSet.has(opt) && isPicked) {
+    // 不正解を選択
+    color =
+      "bg-red-600 text-white border border-red-700 " +               // Light
+      "dark:bg-red-500 dark:text-black dark:border-red-600";         // Dark
+  }
+} else {
+  if (isPicked) {
+    // 採点前の選択
+    color =
+      "bg-blue-600 text-white border border-blue-700 " +             // Light
+      "dark:bg-blue-500 dark:text-black dark:border-blue-600";       // Dark
+  }
+}
+
 
           return (
             <button
               key={opt}
               onClick={() => onToggle(opt)}
-              className={`px-3 py-1 rounded-lg text-sm ${color}`}
+              className={`px-3 py-1 rounded-lg text-sm transition-colors ${color}`}
             >
               {opt}
             </button>
