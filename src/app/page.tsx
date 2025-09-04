@@ -160,15 +160,15 @@ function QuizGroup({
           let color = "bg-neutral-100";
           if (revealed) {
             if (correctSet.has(opt) && isPicked) {
-              color = "bg-green-500 text-white";
-            } else if (correctSet.has(opt) && !isPicked) {
-              color = "border border-green-500";
-            } else if (!correctSet.has(opt) && isPicked) {
-              color = "bg-red-500 text-white";
-            }
-          } else {
-            if (isPicked) color = "bg-blue-500 text-white";
+               color = "bg-green-600 text-white border border-green-700"; // 濃い緑
+             } else if (correctSet.has(opt) && !isPicked) {
+              color = "bg-white text-green-700 border border-green-700 font-semibold"; // 枠付き
+          } else if (!correctSet.has(opt) && isPicked) {
+        color = "bg-red-600 text-white border border-red-700"; // 濃い赤
           }
+        } else {
+          if (isPicked) color = "bg-blue-600 text-white border border-blue-700"; // 濃い青
+        }
 
           return (
             <button
