@@ -190,7 +190,7 @@ export default function Page() {
 
   useEffect(() => {
     if (mode === "manual" && wine) setSelectedWineId(wine.id);
-  }, [mode]);
+  }, [mode, wine]);
 
   const toggle = (cat: string, opt: string) => {
     setSelected((prev) => {
@@ -283,7 +283,7 @@ export default function Page() {
 
       <div className="space-y-6">
         {ORDER.map((cat) => {
-          const d = toDetail((wine.answers as any)[cat]);
+          const d = toDetail(wine.answers[cat]);
           return (
             <QuizGroup
               key={cat}
