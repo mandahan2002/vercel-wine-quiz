@@ -19,11 +19,10 @@ type WineProfile = {
 };
 
 // === データ ===
-// === データ ===
-// まずは unknown 経由で受ける
+// まずは unknown 経由で受ける（型のぶれを許容）
 const RAW_WINES = wines as unknown as any[];
 
-// JSONのばらつきを吸収して WineProfile に正規化
+// JSON を正規化して WineProfile[] に落とす
 const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
   const rawAnswers = (w.answers ?? {}) as Record<string, any>;
 
@@ -35,7 +34,7 @@ const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
       safeAnswers[key] = { correct: val.correct as string[], note: val.note };
       return;
     }
-    // 旧形対応：["A","B"] の配列だけ入っている場合も拾う
+    // 旧形サポート：["A","B"] のように配列だけの場合
     if (Array.isArray(val)) {
       safeAnswers[key] = { correct: val as string[] };
       return;
@@ -53,6 +52,7 @@ const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
   };
   return normalized;
 });
+
 const ORDER = [
   "清澄度",
   "輝き",
@@ -79,6 +79,7 @@ const ORDER = [
   "グラス",
   "デカンタージュ",
 ];
+
 
 // === カテゴリ別全選択肢 ===
 const ALL_OPTIONS: Record<string, string[]> = {};
