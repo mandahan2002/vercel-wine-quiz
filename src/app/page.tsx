@@ -130,29 +130,29 @@ function QuizGroup({
   }, [correctDetail.correct, picked]);
 
   return (
-    <div className="bg-white rounded-xl shadow p-4">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-3">
-          <h2 className="font-semibold">{title}</h2>
-          {!revealed && showCountHint && score.total > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700">
-              正解数: {score.total}
-            </span>
-          )}
-        </div>
-        {revealed ? (
-          <div className="text-xs text-neutral-500">
-            正解 {score.ok}/{score.total}
-          </div>
-        ) : (
-          <button
-            onClick={onRevealCategory}
-            className="text-xs px-2 py-1 rounded bg-neutral-800 text-white"
-          >
-            このカテゴリを採点
-          </button>
-        )}
+    <div className="rounded-xl shadow p-4 bg-white dark:bg-neutral-900">
+  <div className="flex items-center justify-between gap-2 mb-2">
+    <div className="flex items-center gap-3">
+      <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">{title}</h2>
+      {!revealed && showCountHint && score.total > 0 && (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+          正解数: {score.total}
+        </span>
+      )}
+    </div>
+    {revealed ? (
+      <div className="text-xs text-neutral-600 dark:text-neutral-300">
+        正解 {score.ok}/{score.total}
       </div>
+    ) : (
+      <button
+        onClick={onRevealCategory}
+        className="text-xs px-2 py-1 rounded bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900"
+      >
+        このカテゴリを採点
+      </button>
+    )}
+  </div>
 
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
