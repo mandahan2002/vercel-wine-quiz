@@ -51,6 +51,7 @@ const ORDER = [
 const ALL_OPTIONS: Record<string, string[]> = {};
 ARCHETYPES.forEach((w) => {
   Object.entries(w.answers).forEach(([cat, detail]) => {
+    if (!detail) return; // ★ これを追加（undefined ガード）
     if (!ALL_OPTIONS[cat]) ALL_OPTIONS[cat] = [];
     detail.correct.forEach((c) => {
       if (!ALL_OPTIONS[cat].includes(c)) ALL_OPTIONS[cat].push(c);
