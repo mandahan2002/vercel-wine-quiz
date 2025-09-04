@@ -3,7 +3,11 @@ import React, { useMemo, useState, useEffect } from "react";
 import wines from "@/data/wines.json";
 
 // === 型定義 ===
-type AnswerDetail = { correct: string[]; note?: string };
+type AnswerDetail = {
+  correct: string[];
+  note?: string;
+};
+
 type WineProfile = {
   id: string;
   grape: string;
@@ -11,7 +15,7 @@ type WineProfile = {
   vintageHint: string;
   isRed: boolean;
   notes?: string;
-  answers: Record<string, AnswerDetail>;
+  answers: Record<string, AnswerDetail | undefined>; // ← 修正
 };
 
 // === データ ===
