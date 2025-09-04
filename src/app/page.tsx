@@ -267,9 +267,9 @@ export default function Page() {
     <main className="p-6 space-y-6 max-w-4xl mx-auto">
       <header className="mb-5">
         <h1 className="text-2xl font-bold">逆引きドライテイスティング・クイズ</h1>
-        <p className="text-neutral-600 text-sm mt-1">
-          条件（品種・地域・ヴィンテージ）から全カテゴリを選択して採点。カテゴリ別採点／一括採点に対応。
-        </p>
+        <p className="text-neutral-700 dark:text-neutral-300 text-sm mt-1">
+         条件（品種・地域・ヴィンテージ）から全カテゴリを選択して採点。カテゴリ別採点／一括採点に対応。
+       </p>
 
         <label className="mt-3 inline-flex items-center gap-2 text-sm">
           <input
@@ -327,15 +327,15 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="bg-neutral-50 p-4 rounded-lg">
-        <p className="text-sm text-neutral-700">
-          <strong>品種:</strong> {wine.grape}｜<strong>地域:</strong> {wine.region}｜
-          <strong>ヴィンテージ目安:</strong> {wine.vintageHint}
-        </p>
-        {wine.notes && (
-          <p className="mt-1 text-xs text-neutral-500">解説: {wine.notes}</p>
-        )}
-      </div>
+      <div className="p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800">
+       <p className="text-sm text-neutral-800 dark:text-neutral-100">
+        <strong>品種:</strong> {wine.grape}｜<strong>地域:</strong> {wine.region}｜
+        <strong>ヴィンテージ目安:</strong> {wine.vintageHint}
+       </p>
+       {wine.notes && (
+       <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-300">解説: {wine.notes}</p>
+      )}
+     </div>
 
       <div className="space-y-6">
         {ORDER.map((cat) => {
