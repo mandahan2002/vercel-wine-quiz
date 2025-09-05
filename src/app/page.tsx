@@ -15,11 +15,10 @@ type WineProfile = {
   vintageHint: string;
   isRed: boolean;
   notes?: string;
-  answers: Record<string, AnswerDetail | undefined>; // ← 修正
+  answers: Record<string, AnswerDetail | undefined>;
 };
 
 // === データ ===
-// まずは unknown 経由で受ける（型のぶれを許容）
 const RAW_WINES = wines as unknown as any[];
 
 // JSON を正規化して WineProfile[] に落とす
@@ -80,12 +79,11 @@ const ORDER = [
   "デカンタージュ",
 ];
 
-
 // === カテゴリ別全選択肢 ===
 const ALL_OPTIONS: Record<string, string[]> = {};
 ARCHETYPES.forEach((w) => {
   Object.entries(w.answers).forEach(([cat, detail]) => {
-    if (!detail) return; // ★ これを追加（undefined ガード）
+    if (!detail) return;
     if (!ALL_OPTIONS[cat]) ALL_OPTIONS[cat] = [];
     detail.correct.forEach((c) => {
       if (!ALL_OPTIONS[cat].includes(c)) ALL_OPTIONS[cat].push(c);
@@ -119,7 +117,10 @@ function QuizGroup({
   onRevealCategory: () => void;
   showCountHint: boolean;
 }) {
-  const correctSet = useMemo(() => new Set(correctDetail.correct), [correctDetail.correct]);
+  const correctSet = useMemo(
+    () => new Set(correctDetail.correct),
+    [correctDetail.correct]
+  );
 
   const score = useMemo(() => {
     let ok = 0;
@@ -131,61 +132,62 @@ function QuizGroup({
 
   return (
     <div className="rounded-xl shadow p-4 bg-white dark:bg-neutral-900">
-  <div className="flex items-center justify-between gap-2 mb-2">
-    <div className="flex items-center gap-3">
-      <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">{title}</h2>
-      {!revealed && showCountHint && score.total > 0 && (
-        <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
-          正解数: {score.total}
-        </span>
-      )}
-    </div>
-    {revealed ? (
-      <div className="text-xs text-neutral-600 dark:text-neutral-300">
-        正解 {score.ok}/{score.total}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-3">
+          <h2 className="font-semibold text-neutral-900 dark:text-neutral-100">
+            {title}
+          </h2>
+          {!revealed && showCountHint && score.total > 0 && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+              正解数: {score.total}
+            </span>
+          )}
+        </div>
+        {revealed ? (
+          <div className="text-xs text-neutral-600 dark:text-neutral-300">
+            正解 {score.ok}/{score.total}
+          </div>
+        ) : (
+          <button
+            onClick={onRevealCategory}
+            className="text-xs px-2 py-1 rounded bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900"
+          >
+            このカテゴリを採点
+          </button>
+        )}
       </div>
-    ) : (
-      <button
-        onClick={onRevealCategory}
-        className="text-xs px-2 py-1 rounded bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900"
-      >
-        このカテゴリを採点
-      </button>
-    )}
-  </div>
 
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const isPicked = picked.has(opt);
           let color =
-           "bg-neutral-100 text-neutral-900 border border-neutral-300 " + // ライト
-           "dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-600";
+            "bg-neutral-100 text-neutral-900 border border-neutral-300 " + // Light
+            "dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-600";
           if (revealed) {
-  if (correctSet.has(opt) && isPicked) {
-    // 正解を選択
-    color =
-      "bg-green-600 text-white border border-green-700 " +          // Light
-      "dark:bg-green-500 dark:text-black dark:border-green-600";     // Dark
-  } else if (correctSet.has(opt) && !isPicked) {
-    // 未選択の正解（枠で示す）
-    color =
-      "bg-white text-green-700 border border-green-700 font-semibold " +      // Light
-      "dark:bg-transparent dark:text-green-300 dark:border-green-400";
-  } else if (!correctSet.has(opt) && isPicked) {
-    // 不正解を選択
-    color =
-      "bg-red-600 text-white border border-red-700 " +               // Light
-      "dark:bg-red-500 dark:text-black dark:border-red-600";         // Dark
-  }
-} else {
-  if (isPicked) {
-    // 採点前の選択
-    color =
-      "bg-blue-600 text-white border border-blue-700 " +             // Light
-      "dark:bg-blue-500 dark:text-black dark:border-blue-600";       // Dark
-  }
-}
-
+            if (correctSet.has(opt) && isPicked) {
+              // 正解を選択
+              color =
+                "bg-green-600 text-white border border-green-700 " + // Light
+                "dark:bg-green-500 dark:text-black dark:border-green-600"; // Dark
+            } else if (correctSet.has(opt) && !isPicked) {
+              // 未選択の正解（枠で示す）
+              color =
+                "bg-white text-green-700 border border-green-700 font-semibold " + // Light
+                "dark:bg-transparent dark:text-green-300 dark:border-green-400";
+            } else if (!correctSet.has(opt) && isPicked) {
+              // 不正解を選択
+              color =
+                "bg-red-600 text-white border border-red-700 " + // Light
+                "dark:bg-red-500 dark:text-black dark:border-red-600"; // Dark
+            }
+          } else {
+            if (isPicked) {
+              // 採点前の選択
+              color =
+                "bg-blue-600 text-white border border-blue-700 " + // Light
+                "dark:bg-blue-500 dark:text-black dark:border-blue-600"; // Dark
+            }
+          }
 
           return (
             <button
@@ -211,7 +213,9 @@ export default function Page() {
   const [wine, setWine] = useState<WineProfile | null>(null);
   const [selected, setSelected] = useState<Record<string, Set<string>>>({});
   const [revealed, setRevealed] = useState(false);
-  const [revealedByCat, setRevealedByCat] = useState<Record<string, boolean>>({});
+  const [revealedByCat, setRevealedByCat] = useState<Record<string, boolean>>(
+    {}
+  );
   const [showCountHint, setShowCountHint] = useState(true);
 
   const [mode, setMode] = useState<"random" | "manual">("random");
@@ -222,7 +226,9 @@ export default function Page() {
     setSelected({});
     setRevealed(false);
     setRevealedByCat({});
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const setWineById = (id: string) => {
@@ -264,12 +270,13 @@ export default function Page() {
   if (!wine) return <div>Loading...</div>;
 
   return (
-    <main className="p-6 space-y-6 max-w-4xl mx-auto">
+    <main className="p-6 space-y-6 max-w-4xl mx-auto pb-24 md:pb-28">
+      {/* ヘッダー */}
       <header className="mb-5">
         <h1 className="text-2xl font-bold">逆引きドライテイスティング・クイズ</h1>
         <p className="text-neutral-700 dark:text-neutral-300 text-sm mt-1">
-         条件（品種・地域・ヴィンテージ）から全カテゴリを選択して採点。カテゴリ別採点／一括採点に対応。
-       </p>
+          条件（品種・地域・ヴィンテージ）から全カテゴリを選択して採点。カテゴリ別採点／一括採点に対応。
+        </p>
 
         <label className="mt-3 inline-flex items-center gap-2 text-sm">
           <input
@@ -281,86 +288,87 @@ export default function Page() {
           正解数ヒントを表示
         </label>
 
-        // ヘッダー内のボタングループをこのブロックで置き換え
-<div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
-  {/* セグメントの外枠（ライト/ダーク両対応） */}
-  <div className="inline-flex rounded-lg overflow-hidden border border-neutral-300 bg-white
-                  dark:border-neutral-700 dark:bg-neutral-900">
-    {/* helper: 選択/未選択のスタイル */}
-    {[
-      { key: "random", label: "ランダム" as const },
-      { key: "manual", label: "手動選択" as const },
-    ].map((seg) => {
-      const active = (seg.key === mode);
-      const base =
-        "px-4 py-2 text-sm font-medium transition-colors outline-none " +
-        "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black focus-visible:ring-offset-white " +
-        "dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900";
+        {/* モード切替 & 手動選択 */}
+        <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center">
+          {/* セグメントの外枠（ライト/ダーク両対応） */}
+          <div className="inline-flex rounded-lg overflow-hidden border border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-900">
+            {[
+              { key: "random", label: "ランダム" as const },
+              { key: "manual", label: "手動選択" as const },
+            ].map((seg) => {
+              const active = seg.key === mode;
+              const base =
+                "px-4 py-2 text-sm font-medium transition-colors outline-none " +
+                "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black focus-visible:ring-offset-white " +
+                "dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900";
 
-      const activeCls =
-        "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"; // 選択時：ライト=黒地/白字、ダーク=白地/黒字
-      const inactiveCls =
-        "bg-transparent text-neutral-700 hover:bg-neutral-100 " +       // 未選択（ライト）
-        "dark:text-neutral-300 dark:hover:bg-neutral-800";              // 未選択（ダーク）
+              const activeCls =
+                "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900";
+              const inactiveCls =
+                "bg-transparent text-neutral-700 hover:bg-neutral-100 " +
+                "dark:text-neutral-300 dark:hover:bg-neutral-800";
 
-      return (
-        <button
-          key={seg.key}
-          type="button"
-          aria-pressed={active}
-          className={`${base} ${active ? activeCls : inactiveCls}`}
-          onClick={() => setMode(seg.key as "random" | "manual")}
-        >
-          {seg.label}
-        </button>
-      );
-    })}
-  </div>
+              return (
+                <button
+                  key={seg.key}
+                  type="button"
+                  aria-pressed={active}
+                  className={`${base} ${active ? activeCls : inactiveCls}`}
+                  onClick={() => setMode(seg.key as "random" | "manual")}
+                >
+                  {seg.label}
+                </button>
+              );
+            })}
+          </div>
 
-  {/* 手動モードのセレクトはそのまま */}
-  {mode === "manual" && (
-    <select
-      className="border rounded-lg px-3 py-2 text-sm w-full sm:w-[420px]
-                 bg-white text-neutral-900 border-neutral-300
-                 dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700"
-      value={selectedWineId}
-      onChange={(e) => {
-        const id = e.target.value;
-        setSelectedWineId(id);
-        if (id) setWineById(id);
-      }}
-    >
-      <option value="">ワインを選択...</option>
-      <optgroup label="白ワイン">
-        {ARCHETYPES.filter((w) => !w.isRed).map((w) => (
-          <option key={w.id} value={w.id}>
-            {w.region}｜{w.grape}（{w.vintageHint}）
-          </option>
-        ))}
-      </optgroup>
-      <optgroup label="赤ワイン">
-        {ARCHETYPES.filter((w) => w.isRed).map((w) => (
-          <option key={w.id} value={w.id}>
-            {w.region}｜{w.grape}（{w.vintageHint}）
-          </option>
-        ))}
-      </optgroup>
-    </select>
-  )}
-</div>
-
+          {/* 手動モードのセレクト */}
+          {mode === "manual" && (
+            <select
+              className="border rounded-lg px-3 py-2 text-sm w-full sm:w-[420px]
+                         bg-white text-neutral-900 border-neutral-300
+                         dark:bg-neutral-900 dark:text-neutral-100 dark:border-neutral-700"
+              value={selectedWineId}
+              onChange={(e) => {
+                const id = e.target.value;
+                setSelectedWineId(id);
+                if (id) setWineById(id);
+              }}
+            >
+              <option value="">ワインを選択...</option>
+              <optgroup label="白ワイン">
+                {ARCHETYPES.filter((w) => !w.isRed).map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.region}｜{w.grape}（{w.vintageHint}）
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="赤ワイン">
+                {ARCHETYPES.filter((w) => w.isRed).map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.region}｜{w.grape}（{w.vintageHint}）
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          )}
+        </div>
       </header>
 
+      {/* 現在のワイン情報 */}
       <div className="p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800">
-       <p className="text-sm text-neutral-800 dark:text-neutral-100">
-        <strong>品種:</strong> {wine.grape}｜<strong>地域:</strong> {wine.region}｜
-        <strong>ヴィンテージ目安:</strong> {wine.vintageHint}
-       </p>
-       {wine.notes && (
-       <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-300">解説: {wine.notes}</p>
-      )}
-     </div>
+        <p className="text-sm text-neutral-800 dark:text-neutral-100">
+          <strong>品種:</strong> {wine.grape}｜<strong>地域:</strong> {wine.region}｜
+          <strong>ヴィンテージ目安:</strong> {wine.vintageHint}
+        </p>
+        {wine.notes && (
+          <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-300">
+            解説: {wine.notes}
+          </p>
+        )}
+      </div>
 
+      {/* クイズ本体 */}
       <div className="space-y-6">
         {ORDER.map((cat) => {
           const d = toDetail(wine.answers[cat]);
@@ -380,50 +388,87 @@ export default function Page() {
         })}
       </div>
 
-      {/* 旧: <div className="flex gap-3"> ... */}
-<div className="flex gap-3 flex-wrap items-center">
-  {/* 全カテゴリを採点（主要ボタン） */}
-  <button
-    onClick={() => setRevealed(true)}
-    className="
-      px-5 py-3 rounded-lg font-semibold
-      bg-neutral-900 text-white hover:bg-neutral-800
-      dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200
-      shadow-sm border border-transparent dark:border-neutral-300
-      focus-visible:outline-none focus-visible:ring-2
-      focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
-      dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
-      transition-colors
-    "
-  >
-    全カテゴリを採点
-  </button>
+      {/* デスクトップ（sm以上）：通常位置のボタン */}
+      <div className="hidden sm:flex gap-3 items-center">
+        <button
+          onClick={() => setRevealed(true)}
+          className="
+            px-5 py-3 rounded-lg font-semibold
+            bg-neutral-900 text-white hover:bg-neutral-800
+            dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200
+            shadow-sm border border-transparent dark:border-neutral-300
+            focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+            dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+            transition-colors
+          "
+        >
+          全カテゴリを採点
+        </button>
 
-  {/* 次のワインへ（視認性を上げたセカンダリ） */}
-  <button
-    onClick={nextWine}
-    className="
-      px-5 py-3 rounded-lg font-semibold
-      bg-neutral-100 text-neutral-900 hover:bg-neutral-200
-      dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
-      border border-neutral-300 dark:border-neutral-600
-      shadow-sm
-      focus-visible:outline-none focus-visible:ring-2
-      focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
-      dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
-      transition-colors
-    "
-  >
-    次のワインへ
-  </button>
-</div>
-  {/* 画面下に固定（モバイル中心） */}
-<div className="fixed inset-x-0 bottom-0 z-50 p-3
-                bg-white/80 dark:bg-neutral-900/80 backdrop-blur
-                border-t border-neutral-200 dark:border-neutral-700
-                flex gap-3 justify-center">
-  {/* 上の2つのボタンをここに入れる */}
-</div>
+        <button
+          onClick={nextWine}
+          className="
+            px-5 py-3 rounded-lg font-semibold
+            bg-neutral-100 text-neutral-900 hover:bg-neutral-200
+            dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
+            border border-neutral-300 dark:border-neutral-600
+            shadow-sm
+            focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+            dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+            transition-colors
+          "
+        >
+          次のワインへ
+        </button>
+      </div>
+
+      {/* モバイル（sm未満）：画面下に固定 */}
+      <div
+        className="
+          sm:hidden fixed inset-x-0 bottom-0 z-[100] p-3
+          bg-white/80 dark:bg-neutral-900/80 backdrop-blur
+          border-t border-neutral-200 dark:border-neutral-700
+          flex gap-3 justify-center
+          pb-[env(safe-area-inset-bottom)]
+        "
+        role="region"
+        aria-label="モバイル固定操作バー"
+      >
+        <button
+          onClick={() => setRevealed(true)}
+          className="
+            flex-1 px-4 py-3 rounded-lg font-semibold
+            bg-neutral-900 text-white hover:bg-neutral-800
+            dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200
+            shadow-sm border border-transparent dark:border-neutral-300
+            focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+            dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+            transition-colors
+          "
+        >
+          採点
+        </button>
+
+        <button
+          onClick={nextWine}
+          className="
+            flex-1 px-4 py-3 rounded-lg font-semibold
+            bg-neutral-100 text-neutral-900 hover:bg-neutral-200
+            dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
+            border border-neutral-300 dark:border-neutral-600
+            shadow-sm
+            focus-visible:outline-none focus-visible:ring-2
+            focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+            dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+            transition-colors
+          "
+        >
+          次へ
+        </button>
+      </div>
     </main>
   );
 }
