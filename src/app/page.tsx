@@ -380,20 +380,50 @@ export default function Page() {
         })}
       </div>
 
-      <div className="flex gap-3">
-        <button
-          onClick={() => setRevealed(true)}
-          className="px-4 py-2 rounded bg-black text-white"
-        >
-          全カテゴリを採点
-        </button>
-        <button
-          onClick={nextWine}
-          className="px-4 py-2 rounded bg-neutral-200"
-        >
-          次のワインへ
-        </button>
-      </div>
+      {/* 旧: <div className="flex gap-3"> ... */}
+<div className="flex gap-3 flex-wrap items-center">
+  {/* 全カテゴリを採点（主要ボタン） */}
+  <button
+    onClick={() => setRevealed(true)}
+    className="
+      px-5 py-3 rounded-lg font-semibold
+      bg-neutral-900 text-white hover:bg-neutral-800
+      dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200
+      shadow-sm border border-transparent dark:border-neutral-300
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+      dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+      transition-colors
+    "
+  >
+    全カテゴリを採点
+  </button>
+
+  {/* 次のワインへ（視認性を上げたセカンダリ） */}
+  <button
+    onClick={nextWine}
+    className="
+      px-5 py-3 rounded-lg font-semibold
+      bg-neutral-100 text-neutral-900 hover:bg-neutral-200
+      dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700
+      border border-neutral-300 dark:border-neutral-600
+      shadow-sm
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:ring-offset-white
+      dark:focus-visible:ring-white dark:focus-visible:ring-offset-neutral-900
+      transition-colors
+    "
+  >
+    次のワインへ
+  </button>
+</div>
+  {/* 画面下に固定（モバイル中心） */}
+<div className="fixed inset-x-0 bottom-0 z-50 p-3
+                bg-white/80 dark:bg-neutral-900/80 backdrop-blur
+                border-t border-neutral-200 dark:border-neutral-700
+                flex gap-3 justify-center">
+  {/* 上の2つのボタンをここに入れる */}
+</div>
     </main>
   );
 }
