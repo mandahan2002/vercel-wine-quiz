@@ -17,6 +17,7 @@ type WineProfile = {
   vintageHint: string;
   isRed: boolean;
   notes?: string;
+  summary?: string;
   answers: Record<string, AnswerDetail | undefined>;
 };
 
@@ -50,6 +51,7 @@ const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
     vintageHint: w.vintageHint,
     isRed: Boolean(w.isRed),
     notes: w.notes,
+    summary: w.summary,
     answers: safeAnswers,
   };
 });
@@ -367,7 +369,15 @@ export default function Page() {
           );
         })}
       </div>
-
+      
+      // 3) 採点（revealed = true）になったら画面下部に総評を表示
+{/* …本体の下、固定ボタンの直前 or 直後あたりに追加 */}
+{revealed && wine.summary && (
+  <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4 shadow">
+    <h3 className="font-semibold mb-1">総評</h3>
+    <p className="text-sm text-neutral-800 dark:text-neutral-200">{wine.summary}</p>
+  </div>
+)}
       {/* 主要ボタン */}
       <div className="h-24" /> {/* ← 下部固定ボタンのぶん余白を確保 */}
 
