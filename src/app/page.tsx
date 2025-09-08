@@ -10,6 +10,7 @@ type AnswerDetail = {
   examTip?: string;   // ★ 追加：試験対策のヒント（JSA二次の“どれを選ぶか”指針）
 };
 
+type Confusion = { with: string; cues: string; pitfalls?: string };
 type WineProfile = {
   id: string;
   grape: string;
@@ -19,6 +20,7 @@ type WineProfile = {
   notes?: string;
   summary?: string;
   answers: Record<string, AnswerDetail | undefined>;
+  confusions?: Confusion[];
 };
 
 // === データ正規化 ===
@@ -53,6 +55,7 @@ const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
     notes: w.notes,
     summary: w.summary,
     answers: safeAnswers,
+    confusions: (w.confusions ?? []) as Confusion[],
   };
 });
 
@@ -369,8 +372,8 @@ export default function Page() {
           );
         })}
       </div>
-      
-      // 3) 採点（revealed = true）になったら画面下部に総評を表示
+
+       {/* 3) 採点（revealed = true）になったら画面下部に総評を表示 */}
 {/* …本体の下、固定ボタンの直前 or 直後あたりに追加 */}
 {revealed && wine.summary && (
   <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4 shadow">
@@ -378,7 +381,24 @@ export default function Page() {
     <p className="text-sm text-neutral-800 dark:text-neutral-200">{wine.summary}</p>
   </div>
 )}
-      {/* 主要ボタン */}
+{revealed && wine.confusions && wine.confusions.length > 0 && (
+  <div className="rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-4 shadow">
+    <h3 className="font-semibold mb-2">見分けポイント（混同しやすい相手）</h3>
+    <ul className="space-y-2">
+      {wine.confusions.map((c, i) => (
+        <li key={i} className="text-sm">
+          <div className="font-medium">↔ {c.with}</div>
+          <div className="text-neutral-800 dark:text-neutral-200">■ 決め手: {c.cues}</div>
+          {c.pitfalls && (
+            <div className="text-neutral-600 dark:text-neutral-400">▲ 落とし穴: {c.pitfalls}</div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
+
+      {/* 主要ボタン */}  
       <div className="h-24" /> {/* ← 下部固定ボタンのぶん余白を確保 */}
 
       {/* 画面下に固定（モバイル中心） */}
