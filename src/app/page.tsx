@@ -129,6 +129,7 @@ function getOptionsFor(title: string, isRed: boolean, all: Record<string, string
 
 type AnswerDetail = {
   correct: string[];
+  alsoAccept?: string[]; // ★ 準正解
   note?: string;
   examTip?: string;
 };
@@ -173,8 +174,15 @@ const ARCHETYPES: WineProfile[] = RAW_WINES.map((w) => {
   const safeAnswers: Record<string, AnswerDetail | undefined> = {};
   Object.entries(rawAnswers).forEach(([key, val]) => {
     if (!val) return;
-    if (Array.isArray(val.correct)) {
-      safeAnswers[key] = { correct: val.correct as string[], note: val.note, examTip: val.examTip };
+        if (Array.isArray(val.correct)) {
+      // ★ alsoAccept を取り込む
+      const also = Array.isArray(val.alsoAccept) ? (val.alsoAccept as string[]) : undefined;
+      safeAnswers[key] = {
+        correct: val.correct as string[],
+        alsoAccept: also,
+        note: val.note,
+        examTip: val.examTip,
+      };
       return;
     }
     if (Array.isArray(val)) {
@@ -210,7 +218,8 @@ ARCHETYPES.forEach((w) => {
   Object.entries(w.answers).forEach(([cat, detail]) => {
     if (!detail) return;
     if (!ALL_OPTIONS[cat]) ALL_OPTIONS[cat] = [];
-    detail.correct.forEach((c) => {
+        // 正解と準正解の両方を候補に含める
+    [...detail.correct, ...(detail.alsoAccept ?? [])].forEach((c) => {
       if (!ALL_OPTIONS[cat].includes(c)) ALL_OPTIONS[cat].push(c);
     });
   });
@@ -218,7 +227,8 @@ ARCHETYPES.forEach((w) => {
 
 // === QuizGroup ===
 function QuizGroup({ title, options, picked, onToggle, correctDetail, revealed, onRevealCategory, showCountHint, }: { title: string; options: string[]; picked: Set<string>; onToggle: (v: string) => void; correctDetail: AnswerDetail; revealed: boolean; onRevealCategory: () => void; showCountHint: boolean; }) {
-  const correctSet = useMemo(() => new Set(correctDetail.correct), [correctDetail.correct]);
+    const correctSet = useMemo(() => new Set(correctDetail.correct), [correctDetail.correct]);
+   const alsoSet = useMemo(() => new Set(correctDetail.alsoAccept ?? []), [correctDetail.alsoAccept]);
   const score = useMemo(() => { let ok = 0; correctDetail.correct.forEach((c) => { if (picked.has(c)) ok++; }); return { ok, total: correctDetail.correct.length }; }, [correctDetail.correct, picked]);
   return (
     <div className="rounded-xl shadow p-4 bg-white dark:bg-neutral-900">
@@ -233,28 +243,66 @@ function QuizGroup({ title, options, picked, onToggle, correctDetail, revealed, 
           <button onClick={onRevealCategory} className="text-xs px-2 py-1 rounded bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900">このカテゴリを採点</button>
         )}
       </div>
+            {/* ★ 色の凡例 */}
+      {revealed && (
+        <div className="text-[11px] mb-2 text-neutral-600 dark:text-neutral-300">
+          <span className="inline-flex items-center gap-1 mr-3">
+            <span className="inline-block w-3 h-3 rounded bg-green-600 dark:bg-green-500"></span> 正解
+          </span>
+          <span className="inline-flex items-center gap-1 mr-3">
+            <span className="inline-block w-3 h-3 rounded bg-yellow-400 dark:bg-yellow-500"></span> 準正解
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded bg-red-600 dark:bg-red-500"></span> 誤り
+          </span>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const isPicked = picked.has(opt);
           let color = "bg-neutral-100 text-neutral-900 border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-600";
           if (revealed) {
-            if (correctSet.has(opt) && isPicked) color = "bg-green-600 text-white border border-green-700 dark:bg-green-500 dark:text-black dark:border-green-600";
-            else if (correctSet.has(opt) && !isPicked) color = "bg-white text-green-700 border border-green-700 font-semibold dark:bg-transparent dark:text-green-300 dark:border-green-400";
-            else if (!correctSet.has(opt) && isPicked) color = "bg-red-600 text-white border border-red-700 dark:bg-red-500 dark:text-black dark:border-red-600";
-          } else {
-            if (isPicked) color = "bg-blue-600 text-white border border-blue-700 dark:bg-blue-500 dark:text-black dark:border-blue-600";
-          }
+   if (correctSet.has(opt) && isPicked)
+     color = "bg-green-600 text-white border border-green-700 ...";
+   else if (correctSet.has(opt) && !isPicked)
+     color = "bg-white text-green-700 border border-green-700 font-semibold ...";
+    else if (alsoSet.has(opt) && isPicked) {
+   // 準正解（選択済み）→ 黄色塗り
+   color =
+     "bg-yellow-400 text-black border border-yellow-500 dark:bg-yellow-500 dark:text-black dark:border-yellow-600";
+ } else if (alsoSet.has(opt) && !isPicked) {
+   // 準正解（未選択）→ 黄色枠のみ
+   color =
+     "bg-white text-yellow-700 border border-yellow-500 font-semibold dark:bg-transparent dark:text-yellow-300 dark:border-yellow-400";
+ } else if (!correctSet.has(opt) && !alsoSet.has(opt) && isPicked) {
+   // 完全に誤り（選択済み）
+   color =
+     "bg-red-600 text-white border border-red-700 dark:bg-red-500 dark:text-black dark:border-red-600";
+ }
+ } else {
+   if (isPicked)
+     color = "bg-blue-600 text-white border border-blue-700 ...";
+ }
           return (
             <button key={opt} onClick={() => onToggle(opt)} className={`px-3 py-1 rounded-lg text-sm transition-colors ${color}`}>{opt}</button>
           );
         })}
       </div>
-      {revealed && (correctDetail.note || correctDetail.examTip) && (
+      {revealed && (correctDetail.note || correctDetail.examTip || (correctDetail.alsoAccept?.length)) && (
         <details className="mt-3 group">
           <summary className="cursor-pointer text-sm font-semibold text-neutral-800 dark:text-neutral-100 hover:underline">解説（クリックで展開）</summary>
           <div className="mt-2 text-sm space-y-2 text-neutral-800 dark:text-neutral-200">
             {correctDetail.note && (<p><span className="inline-block px-2 py-0.5 mr-2 rounded bg-neutral-100 dark:bg-neutral-800 text-xs">このワインの根拠</span>{correctDetail.note}</p>)}
             {correctDetail.examTip && (<p><span className="inline-block px-2 py-0.5 mr-2 rounded bg-blue-100 dark:bg-blue-900 text-xs">試験対策ヒント</span>{correctDetail.examTip}</p>)}
+                        {/* ★ 準正解の表示 */}
+            {correctDetail.alsoAccept && correctDetail.alsoAccept.length > 0 && (
+              <p>
+                <span className="inline-block px-2 py-0.5 mr-2 rounded bg-yellow-100 dark:bg-yellow-900 text-xs text-yellow-800 dark:text-yellow-200">
+                  準正解（alsoAccept）
+                </span>
+                {correctDetail.alsoAccept.join("／")}
+              </p>
+            )}
           </div>
         </details>
       )}
