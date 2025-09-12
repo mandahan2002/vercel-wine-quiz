@@ -392,7 +392,7 @@ export default function Page() {
       　    // 白ワイン: タンニン分を非表示／赤ワイン: 酸味・苦味を非表示
 　　　  if (
    　　　　 (!wine.isRed && cat === "味わい:タンニン分") ||
-   　　　　 (wine.isRed && (cat === "味わい:酸味" || cat === "味わい:苦味"))
+   　　　　 (wine.isRed && (cat === "味わい:苦味"))
 　　　　  ) return null;
 
           const key = cat as unknown as string;
