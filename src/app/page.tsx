@@ -294,15 +294,7 @@ function QuizGroup({ title, options, picked, onToggle, correctDetail, revealed, 
           <div className="mt-2 text-sm space-y-2 text-neutral-800 dark:text-neutral-200">
             {correctDetail.note && (<p><span className="inline-block px-2 py-0.5 mr-2 rounded bg-neutral-100 dark:bg-neutral-800 text-xs">このワインの根拠</span>{correctDetail.note}</p>)}
             {correctDetail.examTip && (<p><span className="inline-block px-2 py-0.5 mr-2 rounded bg-blue-100 dark:bg-blue-900 text-xs">試験対策ヒント</span>{correctDetail.examTip}</p>)}
-                        {/* ★ 準正解の表示 */}
-            {correctDetail.alsoAccept && correctDetail.alsoAccept.length > 0 && (
-              <p>
-                <span className="inline-block px-2 py-0.5 mr-2 rounded bg-yellow-100 dark:bg-yellow-900 text-xs text-yellow-800 dark:text-yellow-200">
-                  準正解（alsoAccept）
-                </span>
-                {correctDetail.alsoAccept.join("／")}
-              </p>
-            )}
+            
           </div>
         </details>
       )}
@@ -322,7 +314,27 @@ export default function Page() {
 
   const loadWine = (w: WineProfile) => { setWine(w); setSelected({}); setRevealed(false); setRevealedByCat({}); if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" }); };
   const setWineById = (id: string) => { const found = ARCHETYPES.find((x) => x.id === id); if (found) loadWine(found); };
-  const nextWine = () => { if (mode === "random") { const w = ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)]; loadWine(w);} else { if (selectedWineId) setWineById(selectedWineId);} };
+  const nextWine = () => {
+  if (mode === "random") {
+    const w = ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)];
+    loadWine(w);
+  } else {
+    if (selectedWineId) {
+      const idx = ARCHETYPES.findIndex((x) => x.id === selectedWineId);
+      if (idx >= 0) {
+        const nextIdx = (idx + 1) % ARCHETYPES.length; // 末尾なら先頭に戻る
+        const nextWine = ARCHETYPES[nextIdx];
+        setSelectedWineId(nextWine.id);
+        loadWine(nextWine);
+      }
+    } else {
+      // まだ選択されていなければ先頭のワインを表示
+      const firstWine = ARCHETYPES[0];
+      setSelectedWineId(firstWine.id);
+      loadWine(firstWine);
+    }
+  }
+};
   useEffect(() => { const w = ARCHETYPES[Math.floor(Math.random() * ARCHETYPES.length)]; loadWine(w); }, []);
   useEffect(() => { if (mode === "manual" && wine) setSelectedWineId(wine.id); }, [mode, wine]);
   const toggle = (cat: string, opt: string) => { setSelected((prev) => { const newSet = new Set(prev[cat] ?? []); if (newSet.has(opt)) newSet.delete(opt); else newSet.add(opt); return { ...prev, [cat]: newSet }; }); };
